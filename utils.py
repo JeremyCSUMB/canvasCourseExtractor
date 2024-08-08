@@ -10,3 +10,7 @@ def format_date(date_string):
 def save_json(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=2)
+
+def save_text(data, filename):
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(data)
