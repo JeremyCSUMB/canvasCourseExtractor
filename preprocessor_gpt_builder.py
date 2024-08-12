@@ -23,8 +23,19 @@ Main Objectives:
 1. [First main objective extracted from the description]
 2. [Second main objective extracted from the description]
 3. [Third main objective extracted from the description]
-
 """
+        if 'quiz_details' in assignment and 'quiz_questions' in assignment:
+            assignment_info += f"\nQuiz Details:\n"
+            assignment_info += f"Description: {assignment['quiz_details'].get('description', 'No description')}\n"
+            assignment_info += f"Time Limit: {assignment['quiz_details'].get('time_limit', 'No time limit')} minutes\n"
+            assignment_info += f"Allowed Attempts: {assignment['quiz_details'].get('allowed_attempts', 'Unlimited')}\n"
+            
+            assignment_info += "\nQuiz Questions:\n"
+            for question in assignment['quiz_questions']:
+                assignment_info += f"- {question.get('question_name', 'Unnamed Question')}\n"
+                assignment_info += f"  Type: {question.get('question_type', 'Unknown')}\n"
+                assignment_info += f"  Text: {question.get('question_text', 'No text')}\n\n"
+
         preprocessed.append(assignment_info.strip())
     return preprocessed
 
@@ -38,6 +49,18 @@ Contents:
 """
         for item in module['items']:
             module_info += f"- {item['title']} (Type: {item['type']})\n"
+            if item['type'] == 'Page' and 'page_content' in item:
+                module_info += f"  Page Content:\n{item['page_content']}\n\n"
+            elif item['type'] == 'Quiz' and 'quiz_details' in item and 'quiz_questions' in item:
+                module_info += f"  Quiz Details:\n"
+                module_info += f"    Description: {item['quiz_details'].get('description', 'No description')}\n"
+                module_info += f"    Time Limit: {item['quiz_details'].get('time_limit', 'No time limit')} minutes\n"
+                module_info += f"    Allowed Attempts: {item['quiz_details'].get('allowed_attempts', 'Unlimited')}\n\n"
+                module_info += f"  Quiz Questions:\n"
+                for question in item['quiz_questions']:
+                    module_info += f"    - {question.get('question_name', 'Unnamed Question')}\n"
+                    module_info += f"      Type: {question.get('question_type', 'Unknown')}\n"
+                    module_info += f"      Text: {question.get('question_text', 'No text')}\n\n"
         
         module_info += """
 Summary:
