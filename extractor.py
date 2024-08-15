@@ -1,4 +1,6 @@
+import json
 import requests
+from config import load_config
 
 class CanvasDataExtractor:
     def __init__(self, api_key, domain):
@@ -10,62 +12,59 @@ class CanvasDataExtractor:
             "Content-Type": "application/json"
         }
 
-    def get_courses(self):
-        url = f"{self.base_url}/courses"
-        response = requests.get(url, headers=self.headers)
-        return response.json()
-
-    def get_quiz_details(self, course_id, quiz_id):
-        url = f"{self.base_url}/courses/{course_id}/quizzes/{quiz_id}"
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return f"Failed to fetch quiz details. Status code: {response.status_code}"
-
-    def get_quiz_questions(self, course_id, quiz_id):
-        url = f"{self.base_url}/courses/{course_id}/quizzes/{quiz_id}/questions"
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return f"Failed to fetch quiz questions. Status code: {response.status_code}"
+    def get_course_data(self, course_id):
+        course_data = {
+            "assignments": self.get_assignments(course_id),
+            "modules": self.get_modules(course_id)
+        }
+        return course_data
 
     def get_assignments(self, course_id):
         url = f"{self.base_url}/courses/{course_id}/assignments"
         response = requests.get(url, headers=self.headers)
         assignments = response.json()
         
-        detailed_assignments = []
         for assignment in assignments:
-            detailed_assignment = {
-                "id": assignment.get("id"),
-                "name": assignment.get("name"),
-                "description": assignment.get("description"),
-                "due_at": assignment.get("due_at"),
-                "points_possible": assignment.get("points_possible"),
-                "submission_types": assignment.get("submission_types"),
-                "grading_type": assignment.get("grading_type"),
-                "course_id": assignment.get("course_id"),
-                "html_url": assignment.get("html_url"),
-                "needs_grading_count": assignment.get("needs_grading_count"),
-                "published": assignment.get("published"),
-                "allowed_extensions": assignment.get("allowed_extensions"),
-                "rubric": assignment.get("rubric")
-            }
-            
             if 'online_quiz' in assignment.get("submission_types", []):
                 quiz_id = assignment.get("quiz_id")
                 if quiz_id:
-                    detailed_assignment["quiz_details"] = self.get_quiz_details(course_id, quiz_id)
-                    detailed_assignment["quiz_questions"] = self.get_quiz_questions(course_id, quiz_id)
-            
-            detailed_assignments.append(detailed_assignment)
+                    assignment["quiz_details"] = self.get_quiz_details(course_id, quiz_id)
+                    assignment["quiz_questions"] = self.get_quiz_questions(course_id, quiz_id)
         
-        return detailed_assignments
+        return assignments
 
     def get_modules(self, course_id):
         url = f"{self.base_url}/courses/{course_id}/modules"
+        response = requests.get(url, headers=self.headers)
+        modules = response.json()
+        
+        for module in modules:
+            module['items'] = self.get_module_items(course_id, module['id'])
+        
+        return modules
+
+    def get_module_items(self, course_id, module_id):
+        url = f"{self.base_url}/courses/{course_id}/modules/{module_id}/items"
+        response = requests.get(url, headers=self.headers)
+        items = response.json()
+        
+        for item in items:
+            if item['type'] == 'Page':
+                item['page_content'] = self.get_page_content(course_id, item['page_url'])
+            elif item['type'] == 'Quiz':
+                quiz_id = item['content_id']
+                item['quiz_details'] = self.get_quiz_details(course_id, quiz_id)
+                item['quiz_questions'] = self.get_quiz_questions(course_id, quiz_id)
+        
+        return items
+
+    def get_quiz_details(self, course_id, quiz_id):
+        url = f"{self.base_url}/courses/{course_id}/quizzes/{quiz_id}"
+        response = requests.get(url, headers=self.headers)
+        return response.json()
+
+    def get_quiz_questions(self, course_id, quiz_id):
+        url = f"{self.base_url}/courses/{course_id}/quizzes/{quiz_id}/questions"
         response = requests.get(url, headers=self.headers)
         return response.json()
 
@@ -78,37 +77,19 @@ class CanvasDataExtractor:
         else:
             return f"Failed to fetch page content. Status code: {response.status_code}"
 
-    def get_module_items(self, course_id, module_id):
-        url = f"{self.base_url}/courses/{course_id}/modules/{module_id}/items"
-        response = requests.get(url, headers=self.headers)
-        items = response.json()
-        
-        detailed_items = []
-        for item in items:
-            detailed_item = item.copy()
-            if item['type'] == 'Page':
-                detailed_item['page_content'] = self.get_page_content(course_id, item['page_url'])
-            elif item['type'] == 'Quiz':
-                quiz_id = item['content_id']
-                detailed_item['quiz_details'] = self.get_quiz_details(course_id, quiz_id)
-                detailed_item['quiz_questions'] = self.get_quiz_questions(course_id, quiz_id)
-            detailed_items.append(detailed_item)
-        
-        return detailed_items
+def extract_course_data(course_id):
+    config = load_config()
+    extractor = CanvasDataExtractor(config['api_key'], config['domain'])
+    
+    course_data = extractor.get_course_data(course_id)
+    
+    with open(f'course_{course_id}_raw_data.json', 'w') as f:
+        json.dump(course_data, f, indent=2)
+    
+    print(f"Raw data for course {course_id} has been saved to course_{course_id}_raw_data.json")
+    
+    return course_data
 
-    def extract_course_data(self, course_id):
-        course_data = {
-            "assignments": self.get_assignments(course_id),
-            "modules": []
-        }
-
-        modules = self.get_modules(course_id)
-        for module in modules:
-            module_data = {
-                "id": module["id"],
-                "name": module["name"],
-                "items": self.get_module_items(course_id, module["id"])
-            }
-            course_data["modules"].append(module_data)
-
-        return course_data
+if __name__ == "__main__":
+    course_id = input("Enter the course ID: ")
+    extract_course_data(course_id)

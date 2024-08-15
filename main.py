@@ -17,7 +17,7 @@ def main():
     extractor = CanvasDataExtractor(config['api_key'], config['domain'])
     
     print(f"Extracting data for course {args.course_id}...")
-    course_data = extractor.extract_course_data(args.course_id)
+    course_data = extractor.get_course_data(args.course_id)
 
     if args.raw or not args.preprocessed:
         raw_filename = f"course_{args.course_id}_raw_data.json"
