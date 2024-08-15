@@ -1,15 +1,20 @@
 # Canvas Course Extractor (CCE)
 
-Canvas Course Extractor (CCE) is a Python-based command-line tool designed to extract and preprocess course data from Canvas Learning Management System. It's particularly useful for educators and researchers who want to analyze course content or prepare data for machine learning models, including GPT Builder.
+Canvas Course Extractor (CCE) is a powerful Python-based command-line tool designed to extract and preprocess course data from the Canvas Learning Management System. It's an invaluable resource for educators, researchers, and data scientists who want to analyze course content or prepare data for machine learning models, including GPT Builder.
 
 ## Features
 
-- Extract detailed information about assignments and modules from Canvas courses
+- Extract comprehensive information about assignments and modules from Canvas courses
 - Preprocess extracted data into formats suitable for:
   - Language Model (LLM) fine-tuning
   - GPT Builder projects
-- Command-line interface for easy use
-- Modular structure for easy maintenance and contribution
+- User-friendly command-line interface
+- Modular structure for easy maintenance and extensibility
+
+## Prerequisites
+
+- Python 3.7+
+- A Canvas LMS account with API access
 
 ## Installation
 
@@ -19,7 +24,7 @@ Canvas Course Extractor (CCE) is a Python-based command-line tool designed to ex
    cd canvas-course-extractor
    ```
 
-2. Install the required packages:
+2. Install the required Python packages:
    ```
    pip install requests python-dotenv
    ```
@@ -32,12 +37,13 @@ Canvas Course Extractor (CCE) is a Python-based command-line tool designed to ex
 
 ## Usage
 
-Run the script from the command line:
+Run the script from the command line using the following syntax:
 
 ```
-python main.py course_id [--raw] [--preprocessed {llm,gpt_builder}]
+python main.py <course_id> [--raw] [--preprocessed {llm,gpt_builder}]
 ```
 
+Arguments:
 - `course_id`: The ID of the course you want to extract data from (required)
 - `--raw`: Save the raw extracted data
 - `--preprocessed`: Preprocess the data, with options:
@@ -62,9 +68,9 @@ python main.py 12345 --preprocessed gpt_builder
 
 ## Output
 
-- Raw data is saved as JSON files
-- LLM preprocessed data is saved as JSON files
-- GPT Builder preprocessed data is saved as text files
+- Raw data is saved as JSON files (e.g., `course_12345_raw_data.json`)
+- LLM preprocessed data is saved as JSON files (e.g., `course_12345_preprocessed_llm.json`)
+- GPT Builder preprocessed data is saved as text files (e.g., `course_12345_preprocessed_gpt_builder.txt`)
 
 ## Using Preprocessed Data with GPT Builder
 
@@ -73,7 +79,7 @@ After preprocessing your course data for GPT Builder, you can use it to create a
 1. Go to the GPT Builder interface on the OpenAI platform.
 2. Create a new custom GPT.
 3. In the "Knowledge" section, upload the preprocessed text file (e.g., `course_12345_preprocessed_gpt_builder.txt`).
-4. In the "Instructions" section, use the following prompt prefix to guide the AI's behavior:
+4. In the "Instructions" section, use the following prompt to guide the AI's behavior:
 
 ```
 You are an AI tutor assistant for a specific course. Your knowledge comes from the uploaded course information, which includes details about assignments and modules. Your role is to:
@@ -95,17 +101,33 @@ Remember, your goal is to support student learning and success in the course whi
 
 5. Customize the instructions further based on your specific needs and the nature of your course.
 
-When interacting with the custom GPT, students can ask questions about assignments, due dates, course structure, and receive helpful, course-specific guidance.
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions to the Canvas Course Extractor! Here's how you can help:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/AmazingFeature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+5. Push to the branch (`git push origin feature/AmazingFeature`)
+6. Open a Pull Request
+
+Please ensure your code adheres to the project's coding standards and includes appropriate tests.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-- Thanks to the Canvas LMS team for providing the API
-- Inspired by educators and researchers working with online learning data
+- Thanks to the Canvas LMS team for providing a robust API
+- Inspired by educators and researchers working to enhance online learning experiences
+- Built with love for the educational community
+
+## Support
+
+If you encounter any issues or have questions, please file an issue on the GitHub repository. We'll do our best to provide timely support and address any concerns.
+
+---
+
+Happy extracting and may your courses be ever engaging!
